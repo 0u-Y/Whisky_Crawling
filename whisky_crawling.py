@@ -3,7 +3,7 @@ import requests
 from multiprocessing import Pool
 
 
-whisky_number = list(range(1,1000))
+whisky_number = list(range(2001,10000))
 
 base_url = "https://www.whiskybase.com/whiskies/whisky/{}"
 
@@ -31,40 +31,44 @@ def get_whisky_info(num):
         soup = BeautifulSoup(response.text, 'lxml')
 
 
+        whisky_name = None
+        bottling_serie_value = 'N/A'
+        stated_age_value = 'N/A'
+        strength_value = 'N/A'
+
 
 
         #위스키 정보
         whisky_title_tag = soup.find('h1').find('a')
-        whisky_name = whisky_title_tag.get_text(strip=True)
+        if whisky_title_tag:
+            whisky_name = whisky_title_tag.get_text(strip=True)
 
         bottling_serie_label = soup.find('dt', string="Bottling serie")
-        bottling_serie_value = bottling_serie_label.find_next_sibling('dd').get_text(strip=True) if bottling_serie_label else 'N/A'
+        if bottling_serie_label:
+            bottling_serie_value = bottling_serie_label.find_next_sibling('dd').get_text(strip=True) if bottling_serie_label else 'N/A'
 
         stated_age_label = soup.find('dt', string="Stated Age")
-        stated_age_value = stated_age_label.find_next_sibling('dd').get_text(strip=True)  if stated_age_label else 'N/A'
-
-        if stated_age_value != 'N/A':
-            stated_age_value = stated_age_value.split('y')[0].rstrip()
-        else:
-            stated_age_value = 'N/A' 
+        if stated_age_label:
+            stated_age_value = stated_age_label.find_next_sibling('dd').get_text(strip=True)  if stated_age_label else 'N/A'
+            if 'y' in stated_age_value:
+                stated_age_value = stated_age_value.split('y')[0].rstrip()
 
         strength_label = soup.find('dt', string="Strength")
-        strength_value = strength_label.find_next_sibling('dd').get_text(strip=True) if strength_label else 'N/A'
-
-        if strength_value != 'N/A':
-            strength_value = strength_value.split('V')[0].rstrip()
-        else:
-            strength_value = 'N/A'
+        if strength_label:
+            strength_value = strength_label.find_next_sibling('dd').get_text(strip=True) if strength_label else 'N/A'
+            if 'V' in strength_value:
+                strength_value = strength_value.split('V')[0].rstrip()
 
 
 
 
-        return ({
-            '위스키 이름': whisky_name,
-            'Bottling Serie': bottling_serie_value,
-            'Stated Age': stated_age_value,
-            '도수': strength_value,
-        })
+        if whisky_name:
+            return {
+                '위스키 이름': whisky_name,
+                'Bottling Serie': bottling_serie_value,
+                'Stated Age': stated_age_value,
+                '도수': strength_value,
+            }
     
     return None
 
