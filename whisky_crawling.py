@@ -1,16 +1,15 @@
 from bs4 import BeautifulSoup
 import requests
-import pandas as pd
+from multiprocessing import Pool
 
 
-
-
-whisky_number = list(range(1,50))
+whisky_number = list(range(1,1000))
 
 base_url = "https://www.whiskybase.com/whiskies/whisky/{}"
 
 
 whisky_info = []
+
 
 
 
@@ -22,9 +21,9 @@ headers = {
 
 
 
-    
 
-for num in whisky_number:
+def get_whisky_info(num):
+
     url = base_url.format(num)
     response = requests.get(url, headers=headers)
 
@@ -44,53 +43,40 @@ for num in whisky_number:
         stated_age_label = soup.find('dt', string="Stated Age")
         stated_age_value = stated_age_label.find_next_sibling('dd').get_text(strip=True)  if stated_age_label else 'N/A'
 
+        if stated_age_value != 'N/A':
+            stated_age_value = stated_age_value.split('y')[0].rstrip()
+        else:
+            stated_age_value = 'N/A' 
+
         strength_label = soup.find('dt', string="Strength")
         strength_value = strength_label.find_next_sibling('dd').get_text(strip=True) if strength_label else 'N/A'
 
+        if strength_value != 'N/A':
+            strength_value = strength_value.split('V')[0].rstrip()
+        else:
+            strength_value = 'N/A'
 
-        whisky_info.append({
+
+
+
+        return ({
             '위스키 이름': whisky_name,
             'Bottling Serie': bottling_serie_value,
             'Stated Age': stated_age_value,
-            '도수': strength_value
+            '도수': strength_value,
         })
-
-
-
-
-def print_whisky_info():
-    df = pd.DataFrame(whisky_info)
-
-    print(df)
-
-
-print_whisky_info()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
-
-        
-
-        
+    return None
 
 
+def collect_whisky_info():
 
-    
+    with Pool(processes=8) as pool:
+        result = pool.map(get_whisky_info, whisky_number)
+
+    return [r for r in result if r is not None]
+
+
 
 
 
