@@ -21,8 +21,8 @@ def create_connection():
 
 def insert_whisky_info(connection, whisky_data):
     query = """
-    INSERT INTO whisky_info(whisky_name, bottling_serie, stated_age, strength)
-    VALUES (%s, %s, %s, %s)
+    INSERT INTO whisky_info(whisky_name, bottling_serie, stated_age, strength, overall)
+    VALUES (%s, %s, %s, %s, %s)
     """
 
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     
     data = [
-        (whisky['위스키 이름'], whisky['Bottling Serie'], whisky['Stated Age'], whisky['도수']) 
+        (whisky['whisky_name'], whisky['bottling_serie'], whisky['stated_age'], whisky['strength'], whisky['overall']) 
         for whisky in whisky_data
     ]
 

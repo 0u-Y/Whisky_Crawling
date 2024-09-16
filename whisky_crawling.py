@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 from multiprocessing import Pool
+import time
+import random
 
 
-whisky_number = list(range(2001,10000))
+whisky_number = list(range(1,2000))
 
 base_url = "https://www.whiskybase.com/whiskies/whisky/{}"
 
@@ -12,20 +14,28 @@ whisky_info = []
 
 
 
-
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-}
-
+user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3", 
+    "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0", 
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/602.3.12 (KHTML, like Gecko) Version/10.0.1 Safari/602.3.12",
+]
 
 
 
 
 def get_whisky_info(num):
 
+    headers = {
+        "User-Agent": random.choice(user_agents)
+    }
+
+    time.sleep(random.uniform(1, 5))
+
     url = base_url.format(num)
     response = requests.get(url, headers=headers)
+
+
+    time.sleep(random.uniform(1, 5))
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'lxml')
@@ -35,6 +45,7 @@ def get_whisky_info(num):
         bottling_serie_value = 'N/A'
         stated_age_value = 'N/A'
         strength_value = 'N/A'
+        overall_rating_value = 'N/A'
 
 
 
@@ -42,6 +53,7 @@ def get_whisky_info(num):
         whisky_title_tag = soup.find('h1').find('a')
         if whisky_title_tag:
             whisky_name = whisky_title_tag.get_text(strip=True)
+
 
         bottling_serie_label = soup.find('dt', string="Bottling serie")
         if bottling_serie_label:
@@ -59,15 +71,20 @@ def get_whisky_info(num):
             if 'V' in strength_value:
                 strength_value = strength_value.split('V')[0].rstrip()
 
+        overall_rating_label = soup.find('dd', class_='votes-rating')
+        if overall_rating_label:
+            overall_rating_value = overall_rating_label.get_text(strip=True) if overall_rating_label else 'N/A'
+
 
 
 
         if whisky_name:
             return {
-                '위스키 이름': whisky_name,
-                'Bottling Serie': bottling_serie_value,
-                'Stated Age': stated_age_value,
-                '도수': strength_value,
+                'whisky_name': whisky_name,
+                'bottling_serie': bottling_serie_value,
+                'stated_age': stated_age_value,
+                'strength': strength_value,
+                'overall': overall_rating_value
             }
     
     return None
