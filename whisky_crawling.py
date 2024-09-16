@@ -5,7 +5,7 @@ import time
 import random
 
 
-whisky_number = list(range(1,2000))
+whisky_number = list(range(8,100))
 
 base_url = "https://www.whiskybase.com/whiskies/whisky/{}"
 
@@ -14,26 +14,18 @@ whisky_info = []
 
 
 
-user_agents = [
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-]
-
+headers = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+}
 
 
 
 def get_whisky_info(num):
 
-    headers = {
-        "User-Agent": random.choice(user_agents)
-    }
-
     time.sleep(random.uniform(1, 5))
 
     url = base_url.format(num)
     response = requests.get(url, headers=headers)
-
-
-    time.sleep(random.uniform(1, 5))
 
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'lxml')
